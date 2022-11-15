@@ -2,11 +2,17 @@ import pandas as pd
 #from urllib.request import urlopen as uReq
 import requests
 from bs4 import BeautifulSoup as soup
+import csv
 
-def get_page_ingredients(): 
+def create_new_ingredientsdbcsv(): 
+	myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
+
+	get_page_ingredients(myurl)
+
+def get_page_ingredients(myurl): 
 	#https://www.geeksforgeeks.org/scrap-books-using-beautifulsoup-from-books-toscrape-in-python/
 	# variable to store website link as string
-	myurl = 'https://www.eatyourbooks.com/library/recipes/2023108/braised-eggs-with-leek-and'
+	#myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
 	# grab website and store in variable uclient
 	#uClient = uReq(myurl)
 	 
@@ -19,11 +25,12 @@ def get_page_ingredients():
 	# call BeautifulSoup for parsing
 	page_soup = soup(page_html, "html.parser")
 
-	recipe_name = page_soup.find("h1").getText()
+	#recipe_name = page_soup.find("h1").getText()
 	#https://stackoverflow.com/questions/36651256/beautifulsoup-get-h2-text-without-class
 	h1_txt = page_soup.find("h1")
 	h1_txt_h2 = h1_txt.find(class_="h2")
-	print(h1_txt_h2.previous_sibling.strip())
+	recipe_name = h1_txt_h2.previous_sibling.strip()
+	print(recipe_name)
 
 	
 
@@ -32,10 +39,28 @@ def get_page_ingredients():
 	#recipe_ingredients = [x.get_text().strip() for x in page_soup.findAll("li", {"class": ['first ingredient', 'ingredient']})]
 	html_ingre = page_soup.findAll("li", {"class": ['first ingredient', 'ingredient']})
 
+	recipe_ingredients = []
 	for i in html_ingre:
-		print(i.get_text().strip())
+		#print(i.get_text().strip())
+		recipe_ingredients.append(i.get_text().encode('utf-8').strip())
+	print(recipe_ingredients)
 
-	#print(recipe_ingredients)
+	for i in recipe_ingredients: 
+		print(i)
+
+
+	# create csv file of all products
+
+	with open("created_ingreds.csv", 'a') as f:
+		# create the csv writer
+		writer = csv.writer(f)
+
+		f.write("Recipe, Ingredients\n")
+
+		# write a row to the csv file
+		writer.writerow([recipe_name,recipe_ingredients])
+
+
 
 
 
@@ -44,7 +69,7 @@ def read_ingredients_db():
 	print(df['ingredients'].str.contains('basil'))
 
 def main():
-	get_page_ingredients()
+	create_new_ingredientsdbcsv()
 
 	#read_ingredients_db()
 
