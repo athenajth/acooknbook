@@ -5,6 +5,38 @@ from bs4 import BeautifulSoup as soup
 import csv
 import argparse
 
+def recipe_and_ingredients_db_from_book(): 
+	myurls = ["https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/2", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/3", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/4", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
+
+	with open("simpledb.csv", 'w') as c:
+		csvwriter = csv.writer(c)
+
+		for myurl in myurls: 
+			print(myurl)
+			page_html = requests.get(myurl).text 
+			page_soup = soup(page_html, "html.parser")
+
+			for b in page_soup.find_all('div', class_="book-data"): 
+				recipe_title = b.find('a', href=True, class_="RecipeTitleExp").get_text()
+				print(recipe_title)
+				
+				lis = b.find_all('li')
+				for l in lis: 
+					lb = l.find('b')
+					if lb:
+						if 'Ingredients' in lb.get_text(): 
+							recipe_ingredients = l.get_text().replace('Ingredients:','').strip()
+							print('\t'+recipe_ingredients)
+							break
+
+				csvwriter.writerow([recipe_title,recipe_ingredients])
+
+
 
 #don't need to use after inital txt doc created
 def find_recipe_urls(): 
@@ -14,6 +46,10 @@ def find_recipe_urls():
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/4", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
+
+
+
+
 
 	with open("recipeurls.txt", 'w') as f:
 		for myurl in myurls: 
@@ -93,24 +129,30 @@ def read_ingredients_db():
 
 def parse_cmdline(): 
     parser = argparse.ArgumentParser(description='des')
-    parser.add_argument('-u', '--url_txt', help='path to txt file with the urls of recipes')
+    #parser.add_argument('-u', '--url_txt', help='path to txt file with the urls of recipes')
     parser.add_argument('-d', '--db_csv', help='path to csv file with the ingredients db')
 
     args = parser.parse_args()
 
-    return [args.url_txt, args.db_csv]
+    return [args.db_csv]
 
 def main():
-	[url_txt, db_csv] = parse_cmdline()
-	if url_txt == None: 
-		print("Scraping the following pages for recipe urls: ")
-		find_recipe_urls()
-		url_txt = "recipeurls.txt"
+	[db_csv] = parse_cmdline()
+
+	# if url_txt == None: 
+	# 	print("Scraping the following pages for recipe urls: ")
+	# 	find_recipe_urls()
+	# 	url_txt = "recipeurls.txt"
+
+	# if db_csv == None: 
+	# 	print("Creating new ingredients database from urls in "+ url_txt +": ")
+	# 	create_new_ingredientsdbcsv(url_txt)
+	# 	db_csv = "dbingredients.csv"
 
 	if db_csv == None: 
-		print("Creating new ingredients database from urls in "+ url_txt +": ")
-		create_new_ingredientsdbcsv(url_txt)
-		db_csv = "dbingredients.csv"
+		print("Creating new ingredients database: ")
+		recipe_and_ingredients_db_from_book()
+		db_csv = "simpledb.csv"
 
 
 	#read_ingredients_db()
