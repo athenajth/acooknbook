@@ -4,21 +4,25 @@ import requests
 from bs4 import BeautifulSoup as soup
 import csv
 
+#don't need to use after inital txt doc created
 def find_recipe_urls(): 
-	myurl = "https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook"
+	myurls = ["https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/2", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/3", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/4", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
+			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
 
-	page_html = requests.get(myurl).text 
-	 
-	# call BeautifulSoup for parsing
-	page_soup = soup(page_html, "html.parser")
+	for myurl in myurls: 
+		page_html = requests.get(myurl).text 
+		page_soup = soup(page_html, "html.parser")
 
-	base_url = "https://www.eatyourbooks.com"
-	for ahref in page_soup.find_all('a', href=True, class_="RecipeTitleExp"): 
-		print (base_url+ahref['href'])
-
+		base_url = "https://www.eatyourbooks.com"
+		for ahref in page_soup.find_all('a', href=True, class_="RecipeTitleExp"): 
+			print (base_url+ahref['href'])
 
 
-
+#don't need to use after inital db.csv created
 def create_new_ingredientsdbcsv(): 
 	#later read from file of urls
 	myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
