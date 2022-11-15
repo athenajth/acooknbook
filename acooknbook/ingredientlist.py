@@ -3,6 +3,8 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup as soup
 import csv
+import argparse
+
 
 #don't need to use after inital txt doc created
 def find_recipe_urls(): 
@@ -15,13 +17,14 @@ def find_recipe_urls():
 
 	with open("bookurls.txt", 'w') as f:
 		for myurl in myurls: 
+			print(myurl)
 			page_html = requests.get(myurl).text 
 			page_soup = soup(page_html, "html.parser")
 
 			base_url = "https://www.eatyourbooks.com"
 			for ahref in page_soup.find_all('a', href=True, class_="RecipeTitleExp"): 
 				url_str = base_url+ahref['href']
-				print (url_str)
+				print ('\t'+url_str)
 				f.write(url_str+'\n')
 
 
@@ -93,8 +96,21 @@ def read_ingredients_db():
 	df = pd.read_csv("ingredientsdb.csv")
 	print(df['ingredients'].str.contains('basil'))
 
+def parse_cmdline(): 
+    parser = argparse.ArgumentParser(description='des')
+    parser.add_argument('-u', '--url_txt', help='path to txt file with the urls of recipes')
+
+
+    args = parser.parse_args()
+
+    return [args.url_txt]
+
 def main():
-	find_recipe_urls()
+	[url_txt] = parse_cmdline()
+	if url_txt == None: 
+		print("Scraping the following pages for recipe urls: ")
+		find_recipe_urls()
+
 	#create_new_ingredientsdbcsv()
 
 	#read_ingredients_db()
