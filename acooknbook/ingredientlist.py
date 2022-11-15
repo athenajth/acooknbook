@@ -29,20 +29,23 @@ def find_recipe_urls():
 
 
 #don't need to use after inital db.csv created
-def create_new_ingredientsdbcsv(): 
-	#later read from file of urls
-	myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
-
+def create_new_ingredientsdbcsv(url_txt): 
+	#myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
 
 	# create csv file of all products
-	with open("created_ingreds.csv", 'w') as f:
+	with open("dbingredients.csv", 'w') as c:
 		# create the csv writer
-		writer = csv.writer(f)
+		writer = csv.writer(c)
 
-		f.write("Recipe, Ingredients\n")
+		c.write("Recipe, Ingredients\n")
 
-		# write a row to the csv file
-		webpage_ingredients_to_row(writer, myurl)
+		#read from file of urls
+		with open(url_txt, 'r') as t:
+			for line in t.readlines(): 
+				myurl = line.strip()
+				print(myurl)
+				# write a row to the csv file
+				webpage_ingredients_to_row(writer, myurl)
 
 def webpage_ingredients_to_row(csvwriter, myurl): 
 	#https://www.geeksforgeeks.org/scrap-books-using-beautifulsoup-from-books-toscrape-in-python/
@@ -99,19 +102,22 @@ def read_ingredients_db():
 def parse_cmdline(): 
     parser = argparse.ArgumentParser(description='des')
     parser.add_argument('-u', '--url_txt', help='path to txt file with the urls of recipes')
-
+    parser.add_argument('-d', '--db_csv', help='path to csv file with the ingredients db')
 
     args = parser.parse_args()
 
-    return [args.url_txt]
+    return [args.url_txt, args.db_csv]
 
 def main():
-	[url_txt] = parse_cmdline()
+	[url_txt, db_csv] = parse_cmdline()
 	if url_txt == None: 
 		print("Scraping the following pages for recipe urls: ")
 		find_recipe_urls()
+		url_txt = "bookurls.txt"
 
-	#create_new_ingredientsdbcsv()
+	if db_csv == None: 
+		create_new_ingredientsdbcsv(url_txt)
+
 
 	#read_ingredients_db()
 
