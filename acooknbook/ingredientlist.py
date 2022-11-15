@@ -15,7 +15,7 @@ def find_recipe_urls():
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
 
-	with open("bookurls.txt", 'w') as f:
+	with open("recipeurls.txt", 'w') as f:
 		for myurl in myurls: 
 			print(myurl)
 			page_html = requests.get(myurl).text 
@@ -80,20 +80,12 @@ def webpage_ingredients_to_row(csvwriter, myurl):
 	recipe_ingredients = []
 	for i in html_ingre:
 		#print(i.get_text().strip())
-		recipe_ingredients.append(i.get_text().encode('utf-8').strip())
-	print(recipe_ingredients)
-
-	for i in recipe_ingredients: 
-		print(i)
-
-
+		ingred = i.get_text().strip()
+		print('\t'+ingred)
+		recipe_ingredients.append(ingred)
 
 	# write a row to the csv file
 	csvwriter.writerow([recipe_name,recipe_ingredients])
-
-
-
-
 
 def read_ingredients_db(): 
 	df = pd.read_csv("ingredientsdb.csv")
@@ -113,10 +105,12 @@ def main():
 	if url_txt == None: 
 		print("Scraping the following pages for recipe urls: ")
 		find_recipe_urls()
-		url_txt = "bookurls.txt"
+		url_txt = "recipeurls.txt"
 
 	if db_csv == None: 
+		print("Creating new ingredients database from urls in "+ url_txt +": ")
 		create_new_ingredientsdbcsv(url_txt)
+		db_csv = "dbingredients.csv"
 
 
 	#read_ingredients_db()
