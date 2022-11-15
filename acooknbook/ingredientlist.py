@@ -4,12 +4,37 @@ import requests
 from bs4 import BeautifulSoup as soup
 import csv
 
+def find_recipe_urls(): 
+	myurl = "https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook"
+
+	page_html = requests.get(myurl).text 
+	 
+	# call BeautifulSoup for parsing
+	page_soup = soup(page_html, "html.parser")
+
+	base_url = "https://www.eatyourbooks.com"
+	for ahref in page_soup.find_all('a', href=True, class_="RecipeTitleExp"): 
+		print (base_url+ahref['href'])
+
+
+
+
 def create_new_ingredientsdbcsv(): 
+	#later read from file of urls
 	myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
 
-	get_page_ingredients(myurl)
 
-def get_page_ingredients(myurl): 
+	# create csv file of all products
+	with open("created_ingreds.csv", 'w') as f:
+		# create the csv writer
+		writer = csv.writer(f)
+
+		f.write("Recipe, Ingredients\n")
+
+		# write a row to the csv file
+		webpage_ingredients_to_row(writer, myurl)
+
+def webpage_ingredients_to_row(csvwriter, myurl): 
 	#https://www.geeksforgeeks.org/scrap-books-using-beautifulsoup-from-books-toscrape-in-python/
 	# variable to store website link as string
 	#myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
@@ -49,16 +74,9 @@ def get_page_ingredients(myurl):
 		print(i)
 
 
-	# create csv file of all products
 
-	with open("created_ingreds.csv", 'a') as f:
-		# create the csv writer
-		writer = csv.writer(f)
-
-		f.write("Recipe, Ingredients\n")
-
-		# write a row to the csv file
-		writer.writerow([recipe_name,recipe_ingredients])
+	# write a row to the csv file
+	csvwriter.writerow([recipe_name,recipe_ingredients])
 
 
 
@@ -69,7 +87,8 @@ def read_ingredients_db():
 	print(df['ingredients'].str.contains('basil'))
 
 def main():
-	create_new_ingredientsdbcsv()
+	find_recipe_urls()
+	#create_new_ingredientsdbcsv()
 
 	#read_ingredients_db()
 
