@@ -5,13 +5,29 @@ from bs4 import BeautifulSoup as soup
 import csv
 import argparse
 
-def recipe_and_ingredients_db_from_book(): 
-	myurls = ["https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook", 
-			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/2", 
-			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/3", 
-			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/4", 
-			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
-			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
+def get_eatyourbooks_pages(initial_url): 
+	page_html = requests.get(initial_url).text 
+	page_soup = soup(page_html, "html.parser")
+
+	#get all links from pagination id, that doesn't have a class (don't want next-page)
+	pages = page_soup.find('li', {"id":"pagination"}).find_all('a', attrs={'class': None})
+
+	#include this inital url in eatyourbook pages
+	pages_urls = [initial_url]
+	for p in pages: 
+		pages_urls.append(p['href'])
+	return pages_urls
+
+
+def recipe_and_ingredients_db_from_pages(): 
+	# myurls = ["https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook", 
+	# 		"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/2", 
+	# 		"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/3", 
+	# 		"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/4", 
+	# 		"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
+	# 		"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
+	myurls = get_eatyourbooks_pages("https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook")
+	#print(myurls)
 
 	with open("simpledb.csv", 'w') as c:
 		csvwriter = csv.writer(c)
@@ -21,10 +37,14 @@ def recipe_and_ingredients_db_from_book():
 			page_html = requests.get(myurl).text 
 			page_soup = soup(page_html, "html.parser")
 
+			#get all blocks of book-data
 			for b in page_soup.find_all('div', class_="book-data"): 
+
+				#recipe title is the link text under class = "RecipeTitleExp"
 				recipe_title = b.find('a', href=True, class_="RecipeTitleExp").get_text()
 				print(recipe_title)
 				
+				#ingredients is under an li, where <b>Ingredients</b>. But don't want that part to be part of the ingredients in csv
 				lis = b.find_all('li')
 				for l in lis: 
 					lb = l.find('b')
@@ -34,11 +54,12 @@ def recipe_and_ingredients_db_from_book():
 							print('\t'+recipe_ingredients)
 							break
 
+				#write in csv
 				csvwriter.writerow([recipe_title,recipe_ingredients])
 
 
 
-#don't need to use after inital txt doc created
+#don't need to use after inital txt doc created; actually don't need anymore but maybe should keep as beautiful soup reference? 
 def find_recipe_urls(): 
 	myurls = ["https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/2", 
@@ -46,10 +67,6 @@ def find_recipe_urls():
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/4", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
-
-
-
-
 
 	with open("recipeurls.txt", 'w') as f:
 		for myurl in myurls: 
@@ -64,7 +81,7 @@ def find_recipe_urls():
 				f.write(url_str+'\n')
 
 
-#don't need to use after inital db.csv created
+#don't need to use after inital db.csv created; actually don't need anymore but maybe should keep as beautiful soup reference? 
 def create_new_ingredientsdbcsv(url_txt): 
 	#myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
 
@@ -82,19 +99,12 @@ def create_new_ingredientsdbcsv(url_txt):
 				print(myurl)
 				# write a row to the csv file
 				webpage_ingredients_to_row(writer, myurl)
-
+				
+#; actually don't need anymore but maybe should keep as beautiful soup reference? 
 def webpage_ingredients_to_row(csvwriter, myurl): 
 	#https://www.geeksforgeeks.org/scrap-books-using-beautifulsoup-from-books-toscrape-in-python/
 	# variable to store website link as string
-	#myurl = 'https://www.eatyourbooks.com/library/recipes/2023109/harissa-and-manchego-omelettes'
-	# grab website and store in variable uclient
-	#uClient = uReq(myurl)
-	 
-	# read and close HTML
-	#page_html = uClient.read()
-	#uClient.close()
-	page_html = requests.get(myurl).text #https://stackoverflow.com/questions/36709165/typeerror-object-of-type-response-has-no-len
-	#print(page_html)
+	page_html = requests.get(myurl).text 
 	 
 	# call BeautifulSoup for parsing
 	page_soup = soup(page_html, "html.parser")
@@ -105,10 +115,6 @@ def webpage_ingredients_to_row(csvwriter, myurl):
 	h1_txt_h2 = h1_txt.find(class_="h2")
 	recipe_name = h1_txt_h2.previous_sibling.strip()
 	print(recipe_name)
-
-	
-
-	#print(recipe_name)
 
 	#recipe_ingredients = [x.get_text().strip() for x in page_soup.findAll("li", {"class": ['first ingredient', 'ingredient']})]
 	html_ingre = page_soup.findAll("li", {"class": ['first ingredient', 'ingredient']})
@@ -149,9 +155,11 @@ def main():
 	# 	create_new_ingredientsdbcsv(url_txt)
 	# 	db_csv = "dbingredients.csv"
 
+	#get_eatyourbooks_pages("https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook")
+
 	if db_csv == None: 
 		print("Creating new ingredients database: ")
-		recipe_and_ingredients_db_from_book()
+		recipe_and_ingredients_db_from_pages()
 		db_csv = "simpledb.csv"
 
 
