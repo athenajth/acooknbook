@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup as soup
 import csv
 import argparse
 
+
 def get_eatyourbooks_pages(initial_url): 
 	page_html = requests.get(initial_url).text 
 	page_soup = soup(page_html, "html.parser")
@@ -31,6 +32,9 @@ def recipe_and_ingredients_db_from_pages():
 
 	with open("simpledb.csv", 'w') as c:
 		csvwriter = csv.writer(c)
+
+		c.write("Recipe, Ingredients\n")
+
 
 		for myurl in myurls: 
 			print(myurl)
@@ -99,7 +103,7 @@ def create_new_ingredientsdbcsv(url_txt):
 				print(myurl)
 				# write a row to the csv file
 				webpage_ingredients_to_row(writer, myurl)
-				
+
 #; actually don't need anymore but maybe should keep as beautiful soup reference? 
 def webpage_ingredients_to_row(csvwriter, myurl): 
 	#https://www.geeksforgeeks.org/scrap-books-using-beautifulsoup-from-books-toscrape-in-python/
@@ -129,21 +133,36 @@ def webpage_ingredients_to_row(csvwriter, myurl):
 	# write a row to the csv file
 	csvwriter.writerow([recipe_name,recipe_ingredients])
 
-def read_ingredients_db(): 
-	df = pd.read_csv("ingredientsdb.csv")
-	print(df['ingredients'].str.contains('basil'))
+
+
+
+def read_ingredients_db(dbcsv): 
+	df = pd.read_csv(dbcsv)
+	pd.set_option('display.max_colwidth', -1)
+
+
+	print(df.head())
+
+	print(df[df['Ingredients'].str.contains("basil")])
+
+
+def get_ingredient_recipes(df, ingredient): 
+	print(df[df['Ingredients'].str.contains(ingredient, case=False)])
 
 def parse_cmdline(): 
     parser = argparse.ArgumentParser(description='des')
     #parser.add_argument('-u', '--url_txt', help='path to txt file with the urls of recipes')
     parser.add_argument('-d', '--db_csv', help='path to csv file with the ingredients db')
+    parser.add_argument('-i', '--ingredient', help='ingredient to find in recipes', required='True')
 
     args = parser.parse_args()
 
-    return [args.db_csv]
+    #return [args.db_csv, args.ingredient.upper()]
+    return [args.db_csv, args.ingredient]
+
 
 def main():
-	[db_csv] = parse_cmdline()
+	[db_csv,ingredients] = parse_cmdline()
 
 	# if url_txt == None: 
 	# 	print("Scraping the following pages for recipe urls: ")
@@ -163,7 +182,14 @@ def main():
 		db_csv = "simpledb.csv"
 
 
-	#read_ingredients_db()
+	#read_ingredients_db("simpledb.csv")
+	pd.set_option('display.max_colwidth', -1)
+
+	df = pd.read_csv(db_csv)
+	#df = df.applymap(lambda s: s.upper() if type(s) == str else s) #https://stackoverflow.com/questions/39512002/convert-whole-dataframe-from-lower-case-to-upper-case-with-pandas
+	print(df.head())
+
+	get_ingredient_recipes(df, ingredients)
 
 if __name__ == "__main__":
 	main()
