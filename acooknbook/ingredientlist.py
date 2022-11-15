@@ -13,13 +13,16 @@ def find_recipe_urls():
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/5", 
 			"https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook/6"]
 
-	for myurl in myurls: 
-		page_html = requests.get(myurl).text 
-		page_soup = soup(page_html, "html.parser")
+	with open("bookurls.txt", 'w') as f:
+		for myurl in myurls: 
+			page_html = requests.get(myurl).text 
+			page_soup = soup(page_html, "html.parser")
 
-		base_url = "https://www.eatyourbooks.com"
-		for ahref in page_soup.find_all('a', href=True, class_="RecipeTitleExp"): 
-			print (base_url+ahref['href'])
+			base_url = "https://www.eatyourbooks.com"
+			for ahref in page_soup.find_all('a', href=True, class_="RecipeTitleExp"): 
+				url_str = base_url+ahref['href']
+				print (url_str)
+				f.write(url_str+'\n')
 
 
 #don't need to use after inital db.csv created
