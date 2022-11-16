@@ -61,6 +61,7 @@ def recipe_and_ingredients_db_from_pages():
 				csvwriter.writerow([recipe_title,recipe_page_num,recipe_ingredients])
 
 
+#for testing purposes
 def read_ingredients_db(dbcsv): 
 	df = pd.read_csv(dbcsv)
 	pd.set_option('display.max_colwidth', -1)
@@ -89,32 +90,21 @@ def parse_cmdline():
 def main():
 	[db_csv,ingredients] = parse_cmdline()
 
-	# if url_txt == None: 
-	# 	print("Scraping the following pages for recipe urls: ")
-	# 	find_recipe_urls()
-	# 	url_txt = "recipeurls.txt"
-
-	# if db_csv == None: 
-	# 	print("Creating new ingredients database from urls in "+ url_txt +": ")
-	# 	create_new_ingredientsdbcsv(url_txt)
-	# 	db_csv = "dbingredients.csv"
-
-	#get_eatyourbooks_pages("https://www.eatyourbooks.com/library/186630/ottolenghi-simple-a-cookbook")
-
 	if db_csv == None: 
 		print("Creating new ingredients database: ")
 		recipe_and_ingredients_db_from_pages()
 		db_csv = "simpledb.csv"
 
 
-	#read_ingredients_db("simpledb.csv")
+	#read_ingredients_db("simpledb.csv") #for testing purposes
+
 	pd.set_option('display.max_colwidth', -1)
 
 	df = pd.read_csv(db_csv)
 	#df = df.applymap(lambda s: s.upper() if type(s) == str else s) #https://stackoverflow.com/questions/39512002/convert-whole-dataframe-from-lower-case-to-upper-case-with-pandas
 	print(df.head())
 
-	#get_ingredient_recipes(df, ingredients)
+	get_ingredient_recipes(df, ingredients)
 
 if __name__ == "__main__":
 	main()
