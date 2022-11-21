@@ -13,9 +13,15 @@ def cake_flour(g_cake):
 
     return  '{} grams cake flour =<br> {}g APF + {}g cornstarch'.format(g_cake, g_apf, g_corn)
 
+def df_html_formatting(df):
+    #return (df.head())
+    return df.to_html()
+
 def main_get_ingredient_recipes(ingredient):
     pd.set_option('display.max_colwidth', -1)
 
     df = pd.read_csv(r'/home/acooknbook/mysite/simpledb.csv')
-    #return (df.head())
-    return(df[df['Ingredients'].str.contains(ingredient, case=False)])
+
+    return df_html_formatting(df[df['Ingredients'].str.contains(ingredient, case=False)])
+
+

@@ -2,7 +2,7 @@
 # A very simple Flask Hello World app for you to get started with...
 
 from flask import Flask, request
-from processing import cake_flour, main_get_ingredient_recipes
+from processing import main_get_ingredient_recipes
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -24,20 +24,20 @@ def adder_page():
             return '''
                 <html>
                     <body>
-                        <p>The result of {result}</p>
-                        <p><a href="/">Click here to calculate again</a>
+                        <p>Recipes with {form_ingredient}: {result}</p>
+                        <p><a href="/">Click here to find again</a>
                     </body>
                 </html>
-            '''.format(result=result)
+            '''.format(form_ingredient=form_ingredient, result=result)
 
     return '''
         <html>
             <body>
                 {errors}
-                <p>Enter grams of cake flour to be converted to APF + cornstarch:</p>
+                <p>Enter ingredient to find in the cookbook:</p>
                 <form method="post" action=".">
                     <p><input name="form_ingredient" /></p>
-                    <p><input type="submit" value="Do calculation" /></p>
+                    <p><input type="submit" value="find ingredient" /></p>
                 </form>
             </body>
         </html>
