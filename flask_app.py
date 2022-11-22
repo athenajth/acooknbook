@@ -23,6 +23,7 @@ def adder_page():
             result = main_get_ingredient_recipes(form_ingredient)
             return '''
                 <html>
+                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <body>
                         <p>Recipes with {form_ingredient}: {result}</p>
                         <p><a href="/">Click here to find again</a>
@@ -32,9 +33,10 @@ def adder_page():
 
     return '''
         <html>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <body>
                 {errors}
-                <p>Enter ingredient to find in the cookbook:</p>
+                <p>Enter ingredient to find in the Ottolenghi SIMPLE cookbook:</p>
                 <form method="post" action=".">
                     <p><input name="form_ingredient" /></p>
                     <p><input type="submit" value="find ingredient" /></p>
